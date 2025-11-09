@@ -5,19 +5,29 @@ const llm = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Array to store conversation history
+const conversationHistory = [
+  { role: "system", content: "You are a helpful assistant. Remember the conversation context." }
+];
+
 async function aiAnswer(question) {
   try {
+    // Add user message to history
+    conversationHistory.push({ role: "user", content: question });
+
     const response = await llm.chat.completions.create({
       model: "gpt-4o",
       temperature: 0.7,
-      max_tokens: 200,
-      messages: [
-        { role: "system", content: "You are a helpful assistant." },
-        { role: "user", content: question },
-      ],
+      max_tokens: 250,
+      messages: conversationHistory,
     });
 
-    console.log("\nAI:", response.choices[0].message.content, "\n");
+    const answer = response.choices[0].message.content;
+
+    // Add AI response to history
+    conversationHistory.push({ role: "assistant", content: answer });
+
+    console.log("\nAI:", answer, "\n");
     process.stdout.write("Ask your question: ");
   } catch (err) {
     console.error("Error:", err.message);
