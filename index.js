@@ -1,21 +1,19 @@
-import "dotenv/config";
 import OpenAI from "openai";
 
-export const llm = new OpenAI({
+const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function main() {
-  const response = await llm.chat.completions.create({
-    model: "gpt-4o",
-    temperature: 0.7,
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
     messages: [
       { role: "system", content: "You are a helpful assistant." },
-      { role: "user", content: "Write a short welcome message for a new user." },
+      { role: "user", content: "Hello, how are you?" },
     ],
   });
 
-  console.log(response.choices[0].message.content);
+  console.log(response.choices[0].message);
 }
 
 main();
