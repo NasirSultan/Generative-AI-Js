@@ -1,56 +1,47 @@
 // import "dotenv/config";
-// import OpenAI from "openai";
 // import fs from "fs";
+// import OpenAI from "openai";
 
-// const client = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY, // set your API key in environment
 // });
 
-// async function generateDogImage() {
+// async function transcribeAudio() {
 //   try {
-//     const response = await client.images.generate({
-//       model: "gpt-image-1",
-//       prompt: "A cute dog playing in the park, realistic style",
-//       size: "1024x1024",  // fixed size
+//     const response = await openai.audio.transcriptions.create({
+//       file: fs.createReadStream("ssstik.io_1762802419377.mp3"), // your audio file
+//       model: "gpt-4o-mini-transcribe", // or "whisper-1"
 //     });
 
-//     const imageBase64 = response.data[0].b64_json;
-//     const imageBuffer = Buffer.from(imageBase64, "base64");
-
-//     fs.writeFileSync("dog.png", imageBuffer);
-//     console.log("Dog image saved as dog.png");
-//   } catch (err) {
-//     console.error("Error:", err.message);
+//     console.log("Transcribed text:", response.text);
+//   } catch (error) {
+//     console.error("Error:", error);
 //   }
 // }
 
-// generateDogImage();
+// transcribeAudio();
 
 
-// 
 import "dotenv/config";
-import OpenAI from "openai";
 import fs from "fs";
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function generateImage() {
-  const prompt = "A futuristic city skyline at sunset";
+async function transcribeAudio() {
+  try {
+    const response = await openai.audio.transcriptions.create({
+      file: fs.createReadStream("ssstik.io_1762802514932.mp3"),
+      model: "gpt-4o-mini-transcribe", // or "whisper-1"
+      language: "ur", // set Urdu language
+    });
 
-  const result = await openai.images.generate({
-    model: "dall-e-2",
-    prompt: prompt,
-    size: "1024x1024",
-  });
-
-  const imageUrl = result.data[0].url;
-  console.log("Image URL:", imageUrl);
-  const imageResponse = await fetch(imageUrl);
-  const arrayBuffer = await imageResponse.arrayBuffer();
-  fs.writeFileSync("image.png", Buffer.from(arrayBuffer));
-  console.log("Image saved as image.png");
+    console.log("Transcribed text:", response.text);
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
-generateImage();
+transcribeAudio();
