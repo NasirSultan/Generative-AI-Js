@@ -1,47 +1,49 @@
-// import "dotenv/config";
-// import fs from "fs";
-// import OpenAI from "openai";
+import dotenv from "dotenv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY, // set your API key in environment
-// });
+dotenv.config();
 
-// async function transcribeAudio() {
-//   try {
-//     const response = await openai.audio.transcriptions.create({
-//       file: fs.createReadStream("ssstik.io_1762802419377.mp3"), // your audio file
-//       model: "gpt-4o-mini-transcribe", // or "whisper-1"
-//     });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-//     console.log("Transcribed text:", response.text);
-//   } catch (error) {
-//     console.error("Error:", error);
-//   }
-// }
-
-// transcribeAudio();
-
-
-import "dotenv/config";
-import fs from "fs";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// System instruction defines the assistant's behavior
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.0-flash",
+  systemInstruction:
+    "You are a helpful, clear-thinking AI assistant. Always reason step by step internally but only output final concise answers. Do not reveal your private reasoning."
 });
 
-async function transcribeAudio() {
-  try {
-    const response = await openai.audio.transcriptions.create({
-      file: fs.createReadStream("ssstik.io_1762802514932.mp3"),
-      model: "gpt-4o-mini-transcribe", // or "whisper-1"
-      language: "ur", // set Urdu language
-    });
+// Simulated thinking configuration
+const thinkConfig = {
+  maxThoughtTimeMs: 800, // how long the model is allowed to 'think'
+  maxReasonTokens: 256,  // conceptual internal reasoning limit
+};
 
-    console.log("Transcribed text:", response.text);
-  } catch (error) {
-    console.error("Error:", error);
-  }
+// Function to mimic thought + reasoning
+async function runExample() {
+  const prompt =
+    "Explain why the sky looks blue, in a short and clear way.";
+
+  console.log("Thinking...");
+
+  // Simulate an internal 'thinking delay' (conceptual)
+  await new Promise((res) => setTimeout(res, Math.min(thinkConfig.maxThoughtTimeMs, 1000)));
+
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
+      maxOutputTokens: 200,
+      temperature: 0.7,
+      topP: 0.8,
+    },
+  });
+
+  console.log("\nFinal Answer:");
+  console.log(result.response.text());
+
+  console.log("\nThinking Summary (simulated):");
+  console.log(
+    `Used up to ${thinkConfig.maxReasonTokens} reasoning tokens within ${thinkConfig.maxThoughtTimeMs}ms budget.`
+  );
 }
 
-transcribeAudio();
+runExample();
