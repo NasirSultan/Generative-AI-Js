@@ -5,45 +5,27 @@ dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// System instruction defines the assistant's behavior
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash",
   systemInstruction:
-    "You are a helpful, clear-thinking AI assistant. Always reason step by step internally but only output final concise answers. Do not reveal your private reasoning."
+    "You are a friendly and clear assistant. Explain things simply. give long answer."
 });
 
-// Simulated thinking configuration
-const thinkConfig = {
-  maxThoughtTimeMs: 800, // how long the model is allowed to 'think'
-  maxReasonTokens: 256,  // conceptual internal reasoning limit
-};
+const prompt = "Explain what machine learning is in one short paragraph.";
 
-// Function to mimic thought + reasoning
-async function runExample() {
-  const prompt =
-    "Explain why the sky looks blue, in a short and clear way.";
+async function run() {
+  // Streaming version
+  const stream = await model.generateContentStream(prompt);
 
-  console.log("Thinking...");
+  process.stdout.write("Gemini streaming output:\n\n");
 
-  // Simulate an internal 'thinking delay' (conceptual)
-  await new Promise((res) => setTimeout(res, Math.min(thinkConfig.maxThoughtTimeMs, 1000)));
+  // Collect and print chunks as they arrive
+  for await (const chunk of stream.stream) {
+    const text = chunk.text();
+    if (text) process.stdout.write(text);
+  }
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: {
-      maxOutputTokens: 200,
-      temperature: 0.7,
-      topP: 0.8,
-    },
-  });
-
-  console.log("\nFinal Answer:");
-  console.log(result.response.text());
-
-  console.log("\nThinking Summary (simulated):");
-  console.log(
-    `Used up to ${thinkConfig.maxReasonTokens} reasoning tokens within ${thinkConfig.maxThoughtTimeMs}ms budget.`
-  );
+  console.log("\n\nDone!");
 }
 
-runExample();
+run();
