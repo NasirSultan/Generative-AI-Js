@@ -1,31 +1,40 @@
 import dotenv from "dotenv";
+import { readFileSync } from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+async function main() {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  systemInstruction:
-    "You are a friendly and clear assistant. Explain things simply. give long answer."
-});
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction:
+      "You are a smart AI assistant. Look at the image and give a clear, short description."
+  });
 
-const prompt = "Explain what machine learning is in one short paragraph.";
+  const base64Img = readFileSync("img.png", { encoding: "base64" });
 
-async function run() {
-  // Streaming version
-  const stream = await model.generateContentStream(prompt);
+  const response = await model.generateContent({
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: base64Img
+            }
+          },
+          {
+            text: "Please describe this image."
+          }
+        ]
+      }
+    ]
+  });
 
-  process.stdout.write("Gemini streaming output:\n\n");
-
-  // Collect and print chunks as they arrive
-  for await (const chunk of stream.stream) {
-    const text = chunk.text();
-    if (text) process.stdout.write(text);
-  }
-
-  console.log("\n\nDone!");
+  console.log(response.response.text());
 }
 
-run();
+main();
