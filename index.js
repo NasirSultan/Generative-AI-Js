@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import { readFileSync } from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
@@ -8,12 +7,11 @@ async function main() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction:
-      "You are a smart AI assistant. Look at the image and give a clear, short description."
+    model: "gemini-2.5-flash-image",
+    systemInstruction: "You are an assistant that generates an image from a text prompt."
   });
 
-  const base64Img = readFileSync("img.png", { encoding: "base64" });
+  const prompt = "A cute cartoon cat sitting on a sunny windowsill, pastel colors";
 
   const response = await model.generateContent({
     contents: [
@@ -21,20 +19,16 @@ async function main() {
         role: "user",
         parts: [
           {
-            inlineData: {
-              mimeType: "image/png",
-              data: base64Img
-            }
-          },
-          {
-            text: "Please describe this image."
+            text: prompt
           }
         ]
       }
-    ]
+    ],
+    // specify response modalities if required by the SDK (check docs)
   });
 
-  console.log(response.response.text());
+  // response.candidates[0].content.parts will contain image data in inlineData or similar field
+  console.log(response);
 }
 
 main();
