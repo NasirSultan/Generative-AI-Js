@@ -8,13 +8,12 @@ async function main() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    systemInstruction: "You create images from text."
+    model: "image-1.0-generate-001"
   });
 
   const prompt = "A cute cartoon cat sitting on a sunny windowsill, pastel colors";
 
-  const response = await model.generateContent({
+  const response = await model.generateimage({
     contents: [
       {
         role: "user",
@@ -22,8 +21,7 @@ async function main() {
       }
     ],
     generationConfig: {
-      responseModalities: ["image"],
-      mimeType: "image/png"
+      responseModalities: ["image"]
     }
   });
 
