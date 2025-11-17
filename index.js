@@ -37,7 +37,7 @@ const openai = new OpenAI({
 });
 
 async function generateImage() {
-  const prompt = "A futuristic city skyline at sunset";
+  const prompt = "cat is sleeping on the bed";
 
   const result = await openai.images.generate({
     model: "dall-e-2",
